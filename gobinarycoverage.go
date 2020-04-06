@@ -122,9 +122,10 @@ type Package struct {
 	ImportMap map[string]string // map from source import to ImportPath (identity entries are omitted)
 
 	Deps []string
+
 }
 
-func listPackagesImported(packageName string) (packages []string, imports []string, importsMap map[string]string, err error) {
+func listPackagesImported(packageName string) (packages []string, imports []string, importsMap map[string]string, dir string, err error) {
 	cmd := exec.Command(
 		"go", "list",
 		"-json",
@@ -134,7 +135,7 @@ func listPackagesImported(packageName string) (packages []string, imports []stri
 	cmd.Stdout = buf
 	if err = cmd.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "`go list -json %s failed. Error: %s\n", packageName, err.Error())
-		return nil, nil, nil, err
+		return nil, nil, nil, "", err
 	}
 	// The go list command returns a json byte array parse this into the
 	// appropriate structure, from which we can extract all the Go files present
@@ -142,7 +143,7 @@ func listPackagesImported(packageName string) (packages []string, imports []stri
 	p := &Package{}
 	if err = json.Unmarshal(buf.Bytes(), p); err != nil {
 		fmt.Fprintf(os.Stderr, "`go list -json %s failed. Error: %s\n", packageName, err.Error())
-		return nil, nil, nil, err
+		return nil, nil, nil, "", err
 	}
 	// Filter all the non-local dependencies, and vendored packages
 	// i.e., remove all local libraries, and vendored packages
@@ -152,7 +153,7 @@ func listPackagesImported(packageName string) (packages []string, imports []stri
 			coverPackages = append(coverPackages, pName)
 		}
 	}
-	return coverPackages, p.Imports, p.ImportMap, nil
+	return coverPackages, p.Imports, p.ImportMap, p.Dir, nil
 }
 
 // getFilesInPackage employs `go list 'packageName'` to extract all the files in
@@ -318,7 +319,7 @@ func main() {
 	//
 	// Get all the packages imported by main
 	//
-	packageList, imports, importMap, err := listPackagesImported(os.Args[1])
+	packageList, imports, importMap, dir, err := listPackagesImported(os.Args[1])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to list the packages imported by: %s. Error: %s\n", os.Args[1], err.Error())
 		os.Exit(1)
@@ -329,7 +330,7 @@ func main() {
 	// Parse the main.go file
 	//
 	fset := token.NewFileSet() // positions are relative to fset
-	originalMainAST, err := parseMainGoFile(fset, "/home/olepor/go/src/"+os.Args[1]+"/main.go")
+	originalMainAST, err := parseMainGoFile(fset, dir+"/main.go")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to parse main.go\nError: %s\n", err.Error())
 		os.Exit(1)
