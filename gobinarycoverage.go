@@ -122,7 +122,6 @@ type Package struct {
 	ImportMap map[string]string // map from source import to ImportPath (identity entries are omitted)
 
 	Deps []string
-
 }
 
 func listPackagesImported(packageName string) (packages []string, imports []string, importsMap map[string]string, dir string, err error) {
@@ -254,7 +253,7 @@ func parseMainGoFile(fset *token.FileSet, filePath string) (*ast.File, error) {
 // single unified ast, and returns it. The merging is naive, and does no fancy
 // heurestics for resolving conflicts. Conflicts will have to be solved by a
 // human.
-func mergeASTTrees(fset *token.FileSet, t1 *ast.File, t2 *ast.File) error {
+func mergeASTTrees(fset *token.FileSet, t1 *ast.File, t2 *ast.File) (*bytes.Buffer, error) {
 
 	// Merge the imports from both files
 	ast.Inspect(t1, func(n ast.Node) bool {
@@ -290,14 +289,13 @@ func mergeASTTrees(fset *token.FileSet, t1 *ast.File, t2 *ast.File) error {
 		t1.Decls = append(t1.Decls, decl)
 	}
 
-	// Print the modified AST.
+	// Print the modified AST to buf.
 	var buf bytes.Buffer
 	if err := printer.Fprint(&buf, fset, t1); err != nil {
 		panic(err)
 	}
-	fmt.Printf("%s", buf.Bytes())
 
-	return nil
+	return &buf, nil
 }
 
 // Cover is passed in to the main.go template, and expands all the needed
@@ -352,10 +350,25 @@ func main() {
 	//
 	// merge the two AST's
 	//
-	if err = mergeASTTrees(fset, generatedMainAST, originalMainAST); err != nil {
+	buf, err := mergeASTTrees(fset, generatedMainAST, originalMainAST)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to merge the generated main file with the main file of the package: Error: %s\n", err.Error())
 		os.Exit(1)
 	}
+	//
+	// Replace the main file with the new merged contents
+	//
+	f, err := os.OpenFile(dir + "/main.go", os.O_WRONLY, 0644)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to open the main.go file. Error: %s\n", err.Error())
+		os.Exit(1)
+	}
+	_, err = io.Copy(f, buf)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to replace the contents of main.go. Error: %s\n", err.Error())
+		os.Exit(1)
+	}
+	os.Exit(0)
 }
 
 func generateMainFromTemplate(fset *token.FileSet, cover *Cover) (*ast.File, error) {
