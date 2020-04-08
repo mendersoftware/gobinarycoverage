@@ -31,6 +31,14 @@ Most notably, a `reportCover()` function is added to the source code. This
 function needs to be called before exiting the binary. This means that the
 source code is not yet fully functional, it needs some human intervention.
 
+The created binary will respect two environment variables:
+
+| Environment Variable | Function |
+| -- | -- |
+| COVERAGE_FILEPATH | The directory in which the coverage files generated will be output |
+| COVERAGE_FILENAME | The name suffixed to the coverage file. A value of Test_foo, will give coverage_Test_foo.out in the COVERAGE_FILEPATH directory |
+
+
 ### Example
 
 File `main.go` before running `Gobinarycoverage` on it
