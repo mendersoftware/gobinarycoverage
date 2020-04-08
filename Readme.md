@@ -123,6 +123,73 @@ currently, this is done through a `git patch`.
 Then, finally, the binary can be built, and expected to function just like the
 regular binary would. Which is pretty cool.
 
+## How it works
+
+The tool is taking advantage of existing go tools' functionality. Notably, it
+uses `go list`, in order to figure out which packages `main.go` imports. From
+this information, it runs `go tool cover` on the returned packages. This will
+change the source code in the given packages to add in a counter at each block,
+and a `GoCover` struct to each file, which is responsible for collecting the
+information.
+
+An instrumented function will afterwards look like:
+
+```go
+func (m *MenderError) Error() string {GoCover5.Count[2] = 1;
+        var err error
+        if m.fatal {GoCover5.Count[4] = 1;
+                err = errors.Wrapf(m.cause, "fatal error")
+        } else{ GoCover5.Count[5] = 1;{
+                err = errors.Wrapf(m.cause, "transient error")
+        }}
+        GoCover5.Count[3] = 1;return err.Error()
+}
+```
+
+And the struct present in every file, collecting this information looks like:
+
+```go
+var GoCover5 = struct {
+        Count     [2]uint32
+        Pos       [3 * 2]uint32
+        NumStmt   [2]uint16
+} {
+        Pos: [3 * 8]uint32{
+                35, 37, 0x20025, // [0]
+                39, 41, 0x20026, // [1]
+        },
+        NumStmt: [8]uint16{
+                1, // 0
+                1, // 1
+        },
+}
+```
+
+This struct, then has to be imported into the new `main.go` file. This means
+that the tools needs to generate source code on the fly, which imports these
+structs from every file it covers. Imports in the new `main.go` file will then
+look something like:
+
+```go
+package main
+
+import (
+        "fmt"
+        "io/ioutil"
+        "testing"
+
+        _cover0 "github.com/mendersoftware/mender/app"
+
+        _cover1 "github.com/mendersoftware/mender/cli"
+        
+        ...
+        ...
+
+```
+
+Which the `coverReport()` then takes advantage of in order to collect the
+coverage information from all the packages imported.
+
 ## License
 
 Gobinarycoverage is licensed under the Apache License, Version 2.0. See
