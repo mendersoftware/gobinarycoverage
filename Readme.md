@@ -34,7 +34,7 @@ source code is not yet fully functional, it needs some human intervention.
 ### Example
 
 File `main.go` before running `Gobinarycoverage` on it
-```
+```go
 package main
 
 import (
@@ -83,7 +83,7 @@ func main() {
 Thus in order to have this program capture the coverage during an execution,
 `coverReport()` needs to be called explicitly, like so:
 
-```
+```go
 package main
 
 import (
