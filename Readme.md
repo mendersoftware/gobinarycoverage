@@ -60,7 +60,13 @@ import (
     "testing"
     "fmt"
     "os"
+    
+    ...
+    ...
 )
+
+...
+...
 
 func coverReport() {
    <coverage-magic>
@@ -90,7 +96,13 @@ import (
     "testing"
     "fmt"
     "os"
+    
+    ...
+    ...
 )
+
+...
+...
 
 func coverReport() {
    <coverage-magic>
