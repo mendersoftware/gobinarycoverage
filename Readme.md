@@ -1,7 +1,7 @@
 Gobinarycoverage
 ==============================================
 
-![Mender logo](mender_logo.png)
+![Mender logo](resources/images/mender_logo.png)
 
 Gobinarycoverage is a tool created for instrumenting regular Go packages with a
 main file, with coverage functionality, so that it can be built and run just
