@@ -446,7 +446,7 @@ func coverRegisterFile(fileName string, counter []uint32, pos []uint32, numStmts
 
 func coverReport() {
 
-  reportFile, err := ioutil.TempFile(os.Getenv("COVERAGE_FILEPATH"), "coverage" + os.Getenv("COVERAGE_FILENAME") + ".out")
+  reportFile, err := ioutil.TempFile(os.Getenv("COVERAGE_FILEPATH"), "coverage" + os.Getenv("COVERAGE_FILENAME") + "*.out")
   if err != nil {
     return
   }
