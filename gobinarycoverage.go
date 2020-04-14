@@ -451,7 +451,7 @@ func coverReport() {
     return
   }
 
-  fmt.Fprintf(reportFile, "mode: count")
+  fmt.Fprintf(reportFile, "mode: count\n")
 
   var active, total int64
   var count uint32
