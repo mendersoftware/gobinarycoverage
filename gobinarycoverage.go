@@ -454,7 +454,6 @@ func coverReport() {
   fmt.Fprintf(reportFile, "mode: count\n")
 
   var active, total int64
-  var count uint32
   for name, counts := range coverCounters {
 	  blocks := coverBlocks[name]
 	  for i := range counts {
