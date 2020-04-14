@@ -451,28 +451,30 @@ func coverReport() {
     return
   }
 
-	var active, total int64
-	var count uint32
-	for name, counts := range coverCounters {
-		blocks := coverBlocks[name]
-		for i := range counts {
-			stmts := int64(blocks[i].Stmts)
-			total += stmts
-			if counts[i] > 0 {
-				active += stmts
-			}
-			fmt.Fprintf(reportFile, "%s:%d.%d,%d.%d %d %d\n", name,
-				blocks[i].Line0, blocks[i].Col0,
-				blocks[i].Line1, blocks[i].Col1,
-				stmts,
-				count)
-		}
-	}
-	if total == 0 {
-		fmt.Fprintln(reportFile, "coverage: [no statements]")
-		return
-	}
-	fmt.Fprintf(reportFile, "coverage: %.1f%% of statements %s\n", 100*float64(active)/float64(total), "github.com/mendersoftware/mender")
+  fmt.Fprintf(reportFile, "mode: count")
+
+  var active, total int64
+  var count uint32
+  for name, counts := range coverCounters {
+	  blocks := coverBlocks[name]
+	  for i := range counts {
+		  stmts := int64(blocks[i].Stmts)
+		  total += stmts
+		  if counts[i] > 0 {
+			  active += stmts
+		  }
+		  fmt.Fprintf(reportFile, "%s:%d.%d,%d.%d %d %d\n", name,
+			  blocks[i].Line0, blocks[i].Col0,
+			  blocks[i].Line1, blocks[i].Col1,
+			  stmts,
+			  count)
+	  }
+  }
+  if total == 0 {
+	  fmt.Fprintln(reportFile, "coverage: [no statements]")
+	  return
+  }
+  fmt.Fprintf(reportFile, "coverage: %.1f%% of statements %s\n", 100*float64(active)/float64(total), "github.com/mendersoftware/mender")
   fmt.Fprintf(os.Stderr, "Wrote coverage to the file: %s\n", reportFile.Name())
 
 }
