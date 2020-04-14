@@ -467,7 +467,7 @@ func coverReport() {
 			  blocks[i].Line0, blocks[i].Col0,
 			  blocks[i].Line1, blocks[i].Col1,
 			  stmts,
-			  count)
+			  counts[i])
 	  }
   }
   if total == 0 {
