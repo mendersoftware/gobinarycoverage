@@ -471,10 +471,10 @@ func coverReport() {
 	  }
   }
   if total == 0 {
-	  fmt.Fprintln(reportFile, "coverage: [no statements]")
+	  fmt.Fprintln(os.Stderr, "coverage: [no statements]")
 	  return
   }
-  fmt.Fprintf(reportFile, "coverage: %.1f%% of statements %s\n", 100*float64(active)/float64(total), "github.com/mendersoftware/mender")
+  fmt.Fprintf(os.Stderr, "coverage: %.1f%% of statements %s\n", 100*float64(active)/float64(total), "github.com/mendersoftware/mender")
   fmt.Fprintf(os.Stderr, "Wrote coverage to the file: %s\n", reportFile.Name())
 
 }
